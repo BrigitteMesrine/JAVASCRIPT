@@ -1,0 +1,31 @@
+:root {
+    --high-emphasis : rgba(255, 255, 255, 0.87);
+}
+
+body, html {
+    margin: 0px;
+    padding: 0px;
+    background-color: #121212;
+    color: var(--high-emphasis);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#main_titles {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.title_card {
+    margin: 10px;
+    padding: 10px ;
+    border: 1px solid var(--high-emphasis);
+    min-width: 20%;
+    max-width: 20%;
+    min-height: 25vh;
+    overflow-wrap: break-word;
+}
+
+h1 {
+    font-size: 24px;
+    font-weight: normal;
+}

@@ -2,8 +2,10 @@
 const apiUrl = "./books.json";
 // Fetch JSON data from the API
 let book_array = [];
-let titles_array = [];
+let authors_array = [];
+let categories_array = [];
 let thumbnail_array = [];
+let isbn_array = [];
 fetch(apiUrl)
     .then((response) => {
         if (!response.ok) {
@@ -13,69 +15,18 @@ fetch(apiUrl)
     })
     .then((data) => {
         // Process the JSON data
-        console.log("Data from API:", data);
+        // console.log("Data from API:", data);
 
         book_array = getBooks(data);
-        titles_array = getTitles(book_array);
-        thumbnail_array = getThumbnails(book_array)
-        thumbnail_array.forEach(img => {
-            console.log(img)
-            let thumbnail = document.createElement("div")
-            thumbnail.className = "thumbnail"
-            thumbnail.innerHTML = `<img class="cover" src="${img}">`
-            document.body.appendChild(thumbnail);
-        });
-        // let object = data;
-        // isolate every book element from JSON
-        // for (const i in object) {
-        //     if (Object.prototype.hasOwnProperty.call(object, i)) {
-        //         const book = object[i];
-        //         // isolate authors
-        //         for (const j in book.authors) {
-        //             if (Object.prototype.hasOwnProperty.call(book.authors, j)) {
-        //                 const author = book.authors[j];
-        //                 if (author != "") {
-        //                     let author_option = document.createElement("option");
-        //                     author_option.className = "author_option";
-        //                     author_option.id = author;
-        //                     author_option.innerHTML = author;
-        //                     document.getElementById("author_select").appendChild(author_option);
-        //                 }
-        //             }
-        //         }
+        createCards(book_array)
+        authors_array = getAuthors(book_array);
+        const authors_set = new Set(authors_array.sort())
+        populateSelect(authors_set, "author_option", "author_select")
+        categories_array = getCategory(book_array)
+        const categories_set = new Set(categories_array.sort())
+        populateSelect(categories_set, "category_option", "category_select")
 
-        //         // isolate categories
-        //         for (const j in book.categories) {
-        //             if (Object.prototype.hasOwnProperty.call(book.categories, j)) {
-        //                 const category = book.categories[j];
-        //                 if (category != "") {
-        //                     let category_option = document.createElement("option");
-        //                     category_option.className = "category";
-        //                     category_option.id = category;
-        //                     category_option.innerHTML = category;
-        //                     document.getElementById("category_select").appendChild(category_option);
-        //                 }
-        //             }
-        //         }
-
-
-        //         // isolate titles
-        //         const title = book.title;
-        //         if (title != "") {
-        //             let title_h1 = document.createElement("h1");
-        //             title_h1.className = "title_card";
-        //             title_h1.id = title;
-        //             title_h1.innerHTML = title;
-        //             document.getElementById("main_titles").appendChild(title_h1);
-        //             // document.getElementById(title).appendChild(book.authors.toString());
-        //         }
-
-
-
-
-        //     }
-        // }
-
+        console.log("1" == 1)
     })
     .catch((error) => {
         console.error("Error fetching data:", error);
@@ -92,32 +43,113 @@ function getBooks(data) {
     return array;
 }
 
-function getTitles(input_array) {
-    let array = [];
-    for (const i in input_array) {
-        if (Object.prototype.hasOwnProperty.call(input_array, i)) {
-            const element = input_array[i].title;
-            array.push(element)
+function createCards(book_array) {
+    book_array.forEach(book => {
+        if (book.thumbnailUrl == undefined) {
+            book.thumbnailUrl = "https://p1.storage.canalblog.com/14/48/1145642/91330992_o.png"
+        }
+        if (book.isbn == undefined) {
+            book.isbn = "n/A"
+        }
+        if (book.publishedDate == undefined) {
+            book.publishedDate = "n/A"
+        } else {
+            book.publishedDate.dt_txt = book.publishedDate.dt_txt.substring(0, 10)
+        }
+        let card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML =
+            `<img class="cover" src="${book.thumbnailUrl}" alt="${book.title}">
+        <div class="card_text">
+        <h1>${book.title}</h1>
+        <p>ISBN : ${book.isbn}</p>
+        <p>Published : ${book.publishedDate.dt_txt}</p>
+        <p>Page count : ${book.pageCount}</p>
+        </div>`
+        document.getElementById("main_titles").appendChild(card)
+    });
+}
+
+function getAuthors(book_array) {
+    let array = new Array();
+    let authors_array = new Array();
+    for (const i in book_array) {
+        if (Object.prototype.hasOwnProperty.call(book_array, i)) {
+            const authors = book_array[i].authors;
+            authors_array.push(authors);
+            
         }
     }
+    authors_array.forEach(authors => {
+        authors.forEach(author => {
+            if (author != undefined) {
+                array.push(author)
+            }
+        });
+    });
     return array;
 }
 
-function getThumbnails(input_array) {
-    let array = [];
-    for (const i in input_array) {
-        if (Object.prototype.hasOwnProperty.call(input_array, i)) {
-            const element = input_array[i].thumbnailUrl;
-            array.push(element)
+function getCategory(book_array) {
+    let array = new Array();
+    let categories_array = new Array();
+    for (const i in book_array) {
+        if (Object.prototype.hasOwnProperty.call(book_array, i)) {
+            const categories = book_array[i].categories;
+            categories_array.push(categories);
+            
         }
     }
+    categories_array.forEach(categories => {
+        categories.forEach(category => {
+            if (category != undefined) {
+                array.push(category)
+            }
+        });
+    });
     return array;
 }
 
-function createCards(titles_array) {
-
+function populateSelect(set, className, parent) {
+    set.forEach(element => {
+        let option = document.createElement("option");
+        option.className = className;
+        option.innerText = element
+        document.getElementById(parent).appendChild(option)
+    });
 }
 
+// function getTitles(input_array) {
+//     let array = [];
+//     for (const i in input_array) {
+//         if (Object.prototype.hasOwnProperty.call(input_array, i)) {
+//             const element = input_array[i].title;
+//             array.push(element)
+//         }
+//     }
+//     return array;
+// }
+
+// function getThumbnails(input_array) {
+//     let array = [];
+//     for (const i in input_array) {
+//         if (Object.prototype.hasOwnProperty.call(input_array, i)) {
+//             const element = input_array[i].thumbnailUrl;
+//             array.push(element)
+//         }
+//     }
+//     return array;
+// }
+// function getIsbn(input_array) {
+//     let array = [];
+//     for (const i in input_array) {
+//         if (Object.prototype.hasOwnProperty.call(input_array, i)) {
+//             const element = input_array[i].isbn;
+//             array.push(element)
+//         }
+//     }
+//     return array;
+// }
 
 
 

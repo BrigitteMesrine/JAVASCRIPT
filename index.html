@@ -9,18 +9,23 @@
 </head>
 
 <body>
-    <header>
-        <select name="authors" id="author_select">
-            <option value="">-- Author --</option>
+    <div class="loader" id="loader"></div>
+    <header id="header">
+        <h1>amazing</h1>
+
+        <select class="select" name="authors" id="author_select">
+            <option class="defaultValue" value="defaultValue">-- Author --</option>
         </select>
-        <select name="categories" id="category_select">
-            <option value="">-- Category --</option>
+        <select class="select" name="categories" id="category_select">
+            <option class="defaultValue" value="defaultValue">-- Category --</option>
         </select>
     </header>
     
     <main id="main_titles">
     </main>
+    <script src="loader.js"></script>
     <script src="script.js" type="module"></script>
+
 </body>
 
 </html>

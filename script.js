@@ -11,22 +11,29 @@ fetch(apiUrl)
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        return response.json(); // Parse the JSON response
+        return response.json();
     })
     .then((data) => {
-        // Process the JSON data
-        // console.log("Data from API:", data);
 
         book_array = getBooks(data);
         createCards(book_array)
         authors_array = getAuthors(book_array);
+
         const authors_set = new Set(authors_array.sort())
         populateSelect(authors_set, "author_option", "author_select")
         categories_array = getCategory(book_array)
         const categories_set = new Set(categories_array.sort())
         populateSelect(categories_set, "category_option", "category_select")
+        console.log(document.querySelectorAll('#main_titles .card').length)
 
-        console.log("1" == 1)
+        document.getElementById("author_select").addEventListener('change', (e) => {
+            sortBy("author_select", "data-authors");
+        })
+
+        document.getElementById("category_select").addEventListener('change', (e) => {
+            sortBy("category_select", "data-categories");
+        })
+
     })
     .catch((error) => {
         console.error("Error fetching data:", error);
@@ -56,9 +63,14 @@ function createCards(book_array) {
         } else {
             book.publishedDate.dt_txt = book.publishedDate.dt_txt.substring(0, 10)
         }
+        
         let card = document.createElement("article");
+        card.setAttribute("data-authors", JSON.stringify(book.authors));
+        card.setAttribute("data-categories", JSON.stringify(book.categories));
         card.className = "card";
-        card.innerHTML =
+        card.id = book.title;
+        if (book.shortDescription == undefined) {
+            card.innerHTML =
             `<img class="cover" src="${book.thumbnailUrl}" alt="${book.title}">
         <div class="card_text">
         <h1>${book.title}</h1>
@@ -66,7 +78,20 @@ function createCards(book_array) {
         <p>Published : ${book.publishedDate.dt_txt}</p>
         <p>Page count : ${book.pageCount}</p>
         </div>`
+        } else {
+            card.innerHTML =
+            `<img class="cover" src="${book.thumbnailUrl}" alt="${book.title}">
+        <div class="card_text">
+        <h1>${book.title}</h1>
+        <p>ISBN : ${book.isbn}</p>
+        <p>Published : ${book.publishedDate.dt_txt}</p>
+        <p>Page count : ${book.pageCount}</p>
+        <p class="desc">Description : ${book.shortDescription}</p>
+        </div>`
+        }
+        
         document.getElementById("main_titles").appendChild(card)
+
     });
 }
 
@@ -77,7 +102,7 @@ function getAuthors(book_array) {
         if (Object.prototype.hasOwnProperty.call(book_array, i)) {
             const authors = book_array[i].authors;
             authors_array.push(authors);
-            
+
         }
     }
     authors_array.forEach(authors => {
@@ -97,7 +122,7 @@ function getCategory(book_array) {
         if (Object.prototype.hasOwnProperty.call(book_array, i)) {
             const categories = book_array[i].categories;
             categories_array.push(categories);
-            
+
         }
     }
     categories_array.forEach(categories => {
@@ -119,37 +144,33 @@ function populateSelect(set, className, parent) {
     });
 }
 
-// function getTitles(input_array) {
-//     let array = [];
-//     for (const i in input_array) {
-//         if (Object.prototype.hasOwnProperty.call(input_array, i)) {
-//             const element = input_array[i].title;
-//             array.push(element)
-//         }
-//     }
-//     return array;
-// }
+function sortBy(select, attribute) {
+    let cards = document.querySelectorAll('#main_titles .card');
+    let selected = document.getElementById(select).value;
+    if (selected == "defaultValue") {
+        for (let i = 0; i < cards.length; i++) {
+            cards[i].style.display = "block";
+        }
+    } else {
+        for (let i = 0; i < cards.length; i++) {
+            let dataAttribute = [...JSON.parse(cards[i].getAttribute(attribute))];
+            if (!dataAttribute.includes(selected)) {
+                cards[i].style.display = "none";
+            } else {
+                cards[i].style.display = "block";
+                // console.log(dataAuthors.length)
+            }
+        }
+    }
+    let selectors = document.querySelectorAll('#header .select');
+    selectors.forEach(element => {
+        if (element.id != select) {
+            element.selectedIndex = 0;
+            console.log(element.id);
+        }
+    });
 
-// function getThumbnails(input_array) {
-//     let array = [];
-//     for (const i in input_array) {
-//         if (Object.prototype.hasOwnProperty.call(input_array, i)) {
-//             const element = input_array[i].thumbnailUrl;
-//             array.push(element)
-//         }
-//     }
-//     return array;
-// }
-// function getIsbn(input_array) {
-//     let array = [];
-//     for (const i in input_array) {
-//         if (Object.prototype.hasOwnProperty.call(input_array, i)) {
-//             const element = input_array[i].isbn;
-//             array.push(element)
-//         }
-//     }
-//     return array;
-// }
+}
 
 
 
